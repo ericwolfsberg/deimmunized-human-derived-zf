@@ -1,35 +1,36 @@
 import argparse
 import random
 
-def load_binding(in_filename):
-    infile = open(in_filename,'r')
-    line = infile.readline()
-    #creating dictionaries that map zf names to their sequences, codons, and scores
-    zf_seq = {}
-    zf_codon = {}
-    zf_score = {}
-    linenum = 1
-    while line:
-        data = line.split('\t')
-        if len(data) < 4:
-            print('Missing data for ZF on line {}; skipping'.format(linenum))
-        else:
-            name = data[0]
-            seq = data[1]
-            codon = data[2]
-            score = data[3]
-            if name in zf_seq:
-                #accounting for circumstance where a single zf can bind to multiple codons
-                #just internally counting those as two separate zfs with different codons and scores
-                name = name + '\t' + codon
-
-            zf_seq[name] = seq
-            zf_codon[name] = codon
-            zf_score[name] = float(score)
-        linenum += 1
+def load_binding(in_filenames):
+    if not type(in_filenames)==list:
+        in_filenames =[in_filenames]
+    for in_filename in in_filenames:
+        infile = open(in_filename,'r')
         line = infile.readline()
-        
-    infile.close()
+        #creating dictionaries that map zf names to their sequences, codons, and scores
+        zf_seq = {}
+        zf_codon = {}
+        zf_score = {}
+        while line:
+            data = line.split('\t')
+            if len(data) < 4:
+                print('Missing data for ZF on line {}; skipping'.format(linenum))
+            else:
+                name = data[0]
+                seq = data[1]
+                codon = data[2]
+                score = data[3]
+                if name in zf_seq:
+                    #accounting for circumstance where a single zf can bind to multiple codons
+                    #just internally counting those as two separate zfs with different codons and scores
+                    name = name + '\t' + codon
+
+                zf_seq[name] = seq
+                zf_codon[name] = codon
+                zf_score[name] = float(score)
+            line = infile.readline()
+            
+        infile.close()
     return zf_seq, zf_codon, zf_score
 
 def load_binding_no_score(in_filename):
@@ -266,7 +267,7 @@ if __name__ == "__main__":
     if arguments['mhc']=='M':
         transition_file = 'MARIA_transitions.txt'
     elif arguments['mhc']=='N':
-        transition_file = 'NetMHCII_transitions.txt'
+        transition_file = ['NetMHCII_transitions_1.txt','NetMHCII_transitions_2.txt']
     else:
         transition_file = arguments['mhc']
     zf_transitions = load_transitions(transition_file, zf_seq)
